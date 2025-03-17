@@ -1,6 +1,6 @@
 exports.handler = async (event) => {
     return {
         statusCode: 200,
-        message: "Hello from Lambda" // Placing message outside body
+        body: JSON.stringify({ statusCode: 200, message: "Hello from Lambda" }) // Ensure proper JSON format
     };
 };
