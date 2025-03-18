@@ -31,22 +31,27 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
 
 	@Override
 	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
+		APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
 		try {
-			// Parse the request body
+			// Parse and validate request body
 			Map<String, Object> requestBody = objectMapper.readValue(request.getBody(), Map.class);
 
-			// Generate UUID and timestamp
+			if (!requestBody.containsKey("principalId") || !requestBody.containsKey("content")) {
+				return response.withStatusCode(400).withBody("{\"error\": \"Missing required fields\"}");
+			}
+
+			// Extract fields safely
 			String eventId = UUID.randomUUID().toString();
 			String createdAt = Instant.now().toString();
 			int principalId = (int) requestBody.get("principalId");
-			Map<String, String> content = (Map<String, String>) requestBody.get("content");
+			Map<String, Object> content = objectMapper.convertValue(requestBody.get("content"), Map.class);
 
 			// Prepare the DynamoDB item
 			Map<String, AttributeValue> item = new HashMap<>();
 			item.put("id", AttributeValue.builder().s(eventId).build());
 			item.put("principalId", AttributeValue.builder().n(String.valueOf(principalId)).build());
 			item.put("createdAt", AttributeValue.builder().s(createdAt).build());
-			item.put("body", AttributeValue.builder().s(objectMapper.writeValueAsString(content)).build());
+			item.put("body", AttributeValue.builder().m(convertToDynamoDBMap(content)).build());
 
 			// Save to DynamoDB
 			PutItemRequest putItemRequest = PutItemRequest.builder()
@@ -62,15 +67,19 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
 			responseBody.put("createdAt", createdAt);
 			responseBody.put("body", content);
 
-			return new APIGatewayProxyResponseEvent()
+			return response
 					.withStatusCode(201)
 					.withBody(objectMapper.writeValueAsString(Map.of("event", responseBody)));
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new APIGatewayProxyResponseEvent()
-					.withStatusCode(500)
-					.withBody("{\"error\": \"Internal Server Error\"}");
+			return response.withStatusCode(500).withBody("{\"error\": \"Internal Server Error\"}");
 		}
+	}
+
+	private Map<String, AttributeValue> convertToDynamoDBMap(Map<String, Object> content) {
+		Map<String, AttributeValue> dynamoDBMap = new HashMap<>();
+		content.forEach((key, value) -> dynamoDBMap.put(key, AttributeValue.builder().s(value.toString()).build()));
+		return dynamoDBMap;
 	}
 }
