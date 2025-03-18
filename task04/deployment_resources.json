@@ -5,9 +5,6 @@
         {
           "Action": [
             "logs:CreateLogGroup",
-            "sqs:ReceiveMessage",
-            "sqs:DeleteMessage",
-            "sqs:GetQueueAttributes",
             "logs:CreateLogStream",
             "logs:PutLogEvents",
             "dynamodb:GetItem",
@@ -17,7 +14,10 @@
             "dynamodb:DeleteItem",
             "ssm:PutParameter",
             "ssm:GetParameter",
-            "kms:Decrypt"
+            "kms:Decrypt",
+            "sqs:ReceiveMessage",
+            "sqs:DeleteMessage",
+            "sqs:GetQueueAttributes"
           ],
           "Effect": "Allow",
           "Resource": "*"
@@ -31,7 +31,7 @@
   "async_queue": {
     "resource_type": "sqs_queue",
     "fifo_queue": false,
-    "visibility_timeout": 150,
+    "visibility_timeout": 400,
     "delay_seconds": 0,
     "maximum_message_size": 1024,
     "message_retention_period": 60,
@@ -43,7 +43,7 @@
   },
   "lambda_topic": {
     "resource_type": "sns_topic",
-    "region": "eu-central-1",
+    "region": "eu-west-1",
     "event_sources": [],
     "tags": {}
   },
