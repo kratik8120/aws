@@ -32,10 +32,14 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
 	@Override
 	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
 		APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
-		try {
-			// Parse and validate request body
-			Map<String, Object> requestBody = objectMapper.readValue(request.getBody(), Map.class);
 
+		try {
+			// Validate and parse request body
+			if (request.getBody() == null || request.getBody().isEmpty()) {
+				return response.withStatusCode(400).withBody("{\"error\": \"Request body is empty\"}");
+			}
+
+			Map<String, Object> requestBody = objectMapper.readValue(request.getBody(), Map.class);
 			if (!requestBody.containsKey("principalId") || !requestBody.containsKey("content")) {
 				return response.withStatusCode(400).withBody("{\"error\": \"Missing required fields\"}");
 			}
@@ -79,7 +83,11 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
 
 	private Map<String, AttributeValue> convertToDynamoDBMap(Map<String, Object> content) {
 		Map<String, AttributeValue> dynamoDBMap = new HashMap<>();
-		content.forEach((key, value) -> dynamoDBMap.put(key, AttributeValue.builder().s(value.toString()).build()));
+		content.forEach((key, value) -> {
+			if (value != null) {
+				dynamoDBMap.put(key, AttributeValue.builder().s(value.toString()).build());
+			}
+		});
 		return dynamoDBMap;
 	}
 }
