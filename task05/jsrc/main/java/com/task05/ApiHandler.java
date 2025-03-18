@@ -32,19 +32,25 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
 	@Override
 	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
 		APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
+		Map<String, Object> debugLogs = new HashMap<>();
 
 		try {
-			// Validate and parse request body
+			debugLogs.put("Step", "Parsing request body");
+
+			// Validate request body
 			if (request.getBody() == null || request.getBody().isEmpty()) {
 				return response.withStatusCode(400).withBody("{\"error\": \"Request body is empty\"}");
 			}
 
+			// Parse and validate input
 			Map<String, Object> requestBody = objectMapper.readValue(request.getBody(), Map.class);
 			if (!requestBody.containsKey("principalId") || !requestBody.containsKey("content")) {
 				return response.withStatusCode(400).withBody("{\"error\": \"Missing required fields\"}");
 			}
 
-			// Extract fields safely
+			debugLogs.put("Step", "Generating UUID and timestamps");
+
+			// Generate values
 			String eventId = UUID.randomUUID().toString();
 			String createdAt = Instant.now().toString();
 			int principalId = (int) requestBody.get("principalId");
@@ -57,12 +63,17 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
 			item.put("createdAt", AttributeValue.builder().s(createdAt).build());
 			item.put("body", AttributeValue.builder().m(convertToDynamoDBMap(content)).build());
 
+			debugLogs.put("Step", "Saving to DynamoDB");
+			debugLogs.put("DynamoDB Item", item);
+
 			// Save to DynamoDB
 			PutItemRequest putItemRequest = PutItemRequest.builder()
 					.tableName(TABLE_NAME)
 					.item(item)
 					.build();
 			dynamoDb.putItem(putItemRequest);
+
+			debugLogs.put("Step", "Data saved to DynamoDB");
 
 			// Prepare response
 			Map<String, Object> responseBody = new HashMap<>();
@@ -71,13 +82,16 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
 			responseBody.put("createdAt", createdAt);
 			responseBody.put("body", content);
 
-			return response
-					.withStatusCode(201)
-					.withBody(objectMapper.writeValueAsString(Map.of("event", responseBody)));
+			response.setStatusCode(201);
+			response.setBody(objectMapper.writeValueAsString(Map.of("event", responseBody)));
+
+			debugLogs.put("Step", "Returning success response");
+			return response;
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			return response.withStatusCode(500).withBody("{\"error\": \"Internal Server Error\"}");
+			debugLogs.put("Error", e.getMessage());
+			return response.withStatusCode(500).withBody("{\"error\": \"Internal Server Error\", \"debug\": " + debugLogs.toString() + "}");
 		}
 	}
 
