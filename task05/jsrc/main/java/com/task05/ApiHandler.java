@@ -1,4 +1,5 @@
 package com.task05;
+
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
@@ -39,13 +40,15 @@ public class ApiHandler implements RequestHandler<Map<String, Object>, Map<Strin
 		context.getLogger().log("Received input: " + request.toString());
 
 		try {
-
+			// Extract data from request
 			int principalId = (int) request.get("principalId");
 			Map<String, String> content = (Map<String, String>) request.get("content");
 
+			// Generate event fields
 			String eventId = UUID.randomUUID().toString();
 			String createdAt = Instant.now().toString();
 
+			// Save event to DynamoDB
 			Table table = dynamoDB.getTable(TABLE_NAME);
 			Item item = new Item()
 					.withPrimaryKey("id", eventId)
@@ -56,6 +59,7 @@ public class ApiHandler implements RequestHandler<Map<String, Object>, Map<Strin
 			table.putItem(item);
 			context.getLogger().log("Saved event to DynamoDB: " + item.toJSON());
 
+			// Prepare success response
 			Map<String, Object> response = new HashMap<>();
 			response.put("statusCode", 201);
 			response.put("event", item.asMap());
@@ -64,6 +68,7 @@ public class ApiHandler implements RequestHandler<Map<String, Object>, Map<Strin
 		} catch (Exception e) {
 			context.getLogger().log("Error processing request: " + e.getMessage());
 
+			// Prepare error response
 			Map<String, Object> errorResponse = new HashMap<>();
 			errorResponse.put("statusCode", 500);
 			errorResponse.put("error", "Internal Server Error: " + e.getMessage());
