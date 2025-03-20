@@ -35,4 +35,4 @@ type Meta {
 	key1: Int
 	key2: String
 }
-    
+
