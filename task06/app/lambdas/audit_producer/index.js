@@ -92,5 +92,5 @@ function unmarshallImage(image) {
     }
   }
 
-  return result;
+  return result   ;
 }
