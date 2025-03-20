@@ -1,13 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>task06-group</groupId>
     <artifactId>task06</artifactId>
     <version>1.0.0</version>
-
     <properties>
         <maven-shade-plugin.version>3.5.2</maven-shade-plugin.version>
         <syndicate.java.plugin.version>1.15.0</syndicate.java.plugin.version>
@@ -17,29 +12,52 @@
         <src.dir>jsrc/main/java</src.dir>
         <resources.dir>jsrc/main/resources</resources.dir>
     </properties>
-
     <dependencies>
-        <!-- AWS dependencies-->
+        <!--  AWS dependencies -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-core</artifactId>
             <version>1.2.0</version>
         </dependency>
-        <!--Syndicate annotations-->
+        <!-- Syndicate annotations -->
         <dependency>
             <groupId>net.sf.aws-syndicate</groupId>
             <artifactId>deployment-configuration-annotations</artifactId>
             <version>${syndicate.java.plugin.version}</version>
         </dependency>
+        <!--  AWS SDK for DynamoDB  -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>dynamodb</artifactId>
+            <version>2.20.21</version>
+            <!--  Use the latest version  -->
+        </dependency>
+        <!--  AWS SDK for Lambda  -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>lambda</artifactId>
+            <version>2.20.21</version>
+        </dependency>
+        <!--  Jackson for JSON parsing  -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.0</version>
+        </dependency>
+        <!--  AWS Lambda Events (DynamoDB Streams)  -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-events</artifactId>
+            <version>3.11.0</version>
+        </dependency>
     </dependencies>
-
     <build>
         <sourceDirectory>${src.dir}</sourceDirectory>
         <resources>
             <resource>
                 <directory>${resources.dir}</directory>
             </resource>
-        </resources>        
+        </resources>
         <plugins>
             <plugin>
                 <groupId>net.sf.aws-syndicate</groupId>
@@ -91,5 +109,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
