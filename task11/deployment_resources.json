@@ -65,11 +65,17 @@
   "task11_api": {
     "resource_type": "api_gateway",
     "deploy_stage": "api",
-    "dependencies": [],
+    "dependencies": [
+      {
+        "resource_name": "${booking_userpool}",
+        "resource_type": "cognito_idp"
+      }
+    ],
     "resources": {
       "/signin": {
         "enable_cors": true,
         "POST": {
+          "enable_proxy": true,
           "authorization_type": "NONE",
           "integration_type": "lambda",
           "lambda_name": "api_handler",
@@ -84,6 +90,7 @@
       "/signup": {
         "enable_cors": true,
         "POST": {
+          "enable_proxy": true,
           "authorization_type": "NONE",
           "integration_type": "lambda",
           "lambda_name": "api_handler",
@@ -98,6 +105,7 @@
       "/tables": {
         "enable_cors": true,
         "GET": {
+          "enable_proxy": true,
           "authorization_type": "authorizer",
           "integration_type": "lambda",
           "lambda_name": "api_handler",
@@ -109,6 +117,7 @@
           "default_error_pattern": true
         },
         "POST": {
+          "enable_proxy": true,
           "authorization_type": "authorizer",
           "integration_type": "lambda",
           "lambda_name": "api_handler",
@@ -123,6 +132,7 @@
       "/tables/{tableId}": {
         "enable_cors": true,
         "GET": {
+          "enable_proxy": true,
           "authorization_type": "authorizer",
           "integration_type": "lambda",
           "lambda_name": "api_handler",
@@ -137,6 +147,7 @@
       "/reservations": {
         "enable_cors": true,
         "GET": {
+          "enable_proxy": true,
           "authorization_type": "authorizer",
           "integration_type": "lambda",
           "lambda_name": "api_handler",
@@ -148,6 +159,7 @@
           "default_error_pattern": true
         },
         "POST": {
+          "enable_proxy": true,
           "authorization_type": "authorizer",
           "integration_type": "lambda",
           "lambda_name": "api_handler",
@@ -183,42 +195,6 @@
     "tags": {}
   },
   "${reservations_table}": {
-    "resource_type": "dynamodb_table",
-    "hash_key_name": "id",
-    "hash_key_type": "S",
-    "read_capacity": 1,
-    "write_capacity": 1,
-    "global_indexes": [],
-    "autoscaling": [],
-    "tags": {}
-  },
-  "simple-booking-userpool": {
-    "resource_type": "cognito_idp",
-    "password_policy": {
-      "minimum_length": 8,
-      "require_uppercase": true,
-      "require_symbols": true,
-      "require_lowercase": true,
-      "require_numbers": true
-    },
-    "auto_verified_attributes": [],
-    "sms_configuration": {},
-    "username_attributes": [],
-    "custom_attributes": [],
-    "client": {},
-    "tags": {}
-  },
-  "Tables": {
-    "resource_type": "dynamodb_table",
-    "hash_key_name": "id",
-    "hash_key_type": "S",
-    "read_capacity": 1,
-    "write_capacity": 1,
-    "global_indexes": [],
-    "autoscaling": [],
-    "tags": {}
-  },
-  "Reservations": {
     "resource_type": "dynamodb_table",
     "hash_key_name": "id",
     "hash_key_type": "S",
